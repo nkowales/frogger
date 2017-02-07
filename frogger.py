@@ -96,7 +96,7 @@ class Player(pygame.sprite.Sprite):
 		self.image_down = {1:"Sprites/down_still.png", -1:"Sprites/down_move.png"}
 		self.image_right = {1:"Sprites/right_still.png", -1:"Sprites/right_move.png"}
 		self.image_left = {1:"Sprites/left_still.png", -1:"Sprites/left_move.png"}
-	
+
 		#sprite movement counts
 		self.up_count = 1
 		self.down_count = 1
@@ -146,15 +146,16 @@ class GameSpace:
 	def player_float(self,obj):
 		if self.player.rect.colliderect(obj.rect):
 			self.player.rect = self.player.rect.move(obj.speed[obj.number],0)
-	
+
 	def inbounds(self,car,lst):
 		if car.rect[0] >= -100 and car.rect[0] <= 650:
-			lst.append(car)	
-		
-	def main(self):
+			lst.append(car)
+
+	def game_screen(self):
 		pygame.init()
 		self.size = self.width, self.height = 640,640
 		self.bg = pygame.image.load("Sprites/background.png")
+		self.go = pygame.image.load("Sprites/game_over.jpg")
 		self.black = 0,0,0
 
 		#variables for object generation
@@ -166,6 +167,7 @@ class GameSpace:
 		self.car_list = []
 		self.temp_car = []
 
+	def frog_start(self):
 		#creating lives image
 		self.lives_list = []
 		self.lives_list.append(Lives(self,560))
@@ -174,6 +176,7 @@ class GameSpace:
 
 		#creating game objects
 		self.player = Player(self)
+		self.score = 0
 
 		#setting up screen
 		self.screen = pygame.display.set_mode(self.size)
@@ -181,6 +184,40 @@ class GameSpace:
 
 		#gameplay variables
 		self.lives = 3
+
+	def wait(self):
+		while True:
+			event = pygame.event.wait()
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == KEYDOWN and event.key == K_y:
+				break
+
+	def frog_restart(self):
+		self.lives = 3
+
+		#creating lives image
+		self.lives_list = []
+		self.lives_list.append(Lives(self,560))
+		self.lives_list.append(Lives(self,580))
+		self.lives_list.append(Lives(self,600))
+
+		self.pressed = {"up":False, "down":False, "right":False, "left":False}
+
+
+		self.screen.fill(self.black)
+		self.screen.blit(self.go,(0,0))
+
+		pygame.display.flip()
+
+		self.wait()
+
+	def main(self):
+
+		self.game_screen()
+
+		self.frog_start()
 
 		#pressed keys
 		self.pressed = {"up":False, "down":False, "right":False, "left":False}
@@ -202,9 +239,9 @@ class GameSpace:
 					if(event.key == pygame.K_DOWN):
 						self.pressed['down'] = True
 
-				if event.type == KEYUP:                   		
+				if event.type == KEYUP:
 					if(event.key == pygame.K_RIGHT):
-						self.pressed['right'] = False	
+						self.pressed['right'] = False
 					if(event.key == pygame.K_LEFT):
                         			self.pressed['left'] = False
 					if(event.key == pygame.K_UP):
@@ -247,10 +284,14 @@ class GameSpace:
 			#Clock and Object ticks
 			self.clock.tick(60)
 			self.player.tick()
+			# print self.player.rect[1]
 			for car in self.car_list:
 				car.tick()
 				self.inbounds(car,self.temp_car)
 				self.player_hit(car)
+
+			if self.lives == 0:
+				self.frog_restart()
 
 			for obj in self.object_list:
 				obj.tick(self.counter)
@@ -258,12 +299,18 @@ class GameSpace:
 				if self.player.rect[1] <=280:
 					self.player_float(obj)
 
-			if self.player.rect[1] <= 280:
+			if self.player.rect[1] <= 280 and self.player.rect[1] >= 50:
 				if self.player.rect.collidelist(self.object_list) == -1:
 					self.lives = self.lives - 1
 					self.lives_list.pop()
 					self.player.rect = self.player.image.get_rect()
-					self.player.rect = self.player.rect.move(320,580)
+					self.player.rect = self.player.rect.move(320,590)
+
+			if self.player.rect[1] < 50:
+				self.score += 1
+				self.player.rect = self.player.image.get_rect()
+				self.player.rect = self.player.rect.move(320,590)
+
 
 			#clearing the off screen cars
 			self.car_list = self.temp_car
@@ -279,7 +326,7 @@ class GameSpace:
 			#display
 			self.screen.fill(self.black)
 			self.screen.blit(self.bg,(0,0))
-			
+
 			for car in self.car_list:
 				self.screen.blit(car.image,car.rect)
 
@@ -292,6 +339,7 @@ class GameSpace:
 			self.screen.blit(self.player.image, self.player.rect)
 
 			pygame.display.flip()
+
 
 if __name__ == '__main__':
 	gs = GameSpace()
