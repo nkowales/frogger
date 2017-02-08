@@ -155,7 +155,7 @@ class GameSpace:
 		pygame.init()
 		self.size = self.width, self.height = 640,640
 		self.bg = pygame.image.load("Sprites/background.png")
-		self.go = pygame.image.load("Sprites/game_over.jpg")
+		self.go = pygame.image.load("Sprites/gameover.png")
 		self.black = 0,0,0
 
 		#variables for object generation
@@ -193,6 +193,9 @@ class GameSpace:
 				sys.exit()
 			if event.type == KEYDOWN and event.key == K_y:
 				break
+			if event.type == KEYDOWN and event.key == K_n:
+				pygame.quit()
+				sys.exit()
 
 	def frog_restart(self):
 		self.lives = 3
