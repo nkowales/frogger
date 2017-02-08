@@ -92,13 +92,11 @@ class Player(pygame.sprite.Sprite):
 		self.rect = self.rect.move(320,600)
 
 		#sprite movement dictionaries
-                self.image_up = {1:"Sprites/up_still.png", -1:"Sprites/up_move.png"}
-                self.image_down = {1:"Sprites/down_still.png", -1:"Sprites/down_move.png"}
-                self.image_right = {1:"Sprites/right_still.png", -1:"Sprites/right_move.png"}
-                self.image_left = {1:"Sprites/left_still.png", -1:"Sprites/left_move.png"}
-                
-                
-	
+		self.image_up = {1:"Sprites/up_still.png", -1:"Sprites/up_move.png"}
+		self.image_down = {1:"Sprites/down_still.png", -1:"Sprites/down_move.png"}
+		self.image_right = {1:"Sprites/right_still.png", -1:"Sprites/right_move.png"}
+		self.image_left = {1:"Sprites/left_still.png", -1:"Sprites/left_move.png"}
+
 		#sprite movement counts
 		self.up_count = 1
 		self.down_count = 1
@@ -137,7 +135,7 @@ class Player(pygame.sprite.Sprite):
 		self.timer = self.timer + 1
 
 class Player2(pygame.sprite.Sprite):
-	def __init__(self,gs=None):
+	def __init__(self, gs=None):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.gs = gs
@@ -146,10 +144,10 @@ class Player2(pygame.sprite.Sprite):
 		self.rect = self.rect.move(100,600)
 
 		#sprite movement dictionaries
-                self.image_up = {1:"Sprites/up_still2.png", -1:"Sprites/up_move2.png"}
-                self.image_down = {1:"Sprites/down_still2.png", -1:"Sprites/down_move2.png"}
-                self.image_right = {1:"Sprites/right_still2.png", -1:"Sprites/right_move2.png"}
-                self.image_left = {1:"Sprites/left_still2.png", -1:"Sprites/left_move2.png"}
+		self.image_up = {1:"Sprites/up_still2.png", -1:"Sprites/up_move2.png"}
+		self.image_down = {1:"Sprites/down_still2.png", -1:"Sprites/down_move2.png"}
+		self.image_right = {1:"Sprites/right_still2.png", -1:"Sprites/right_move2.png"}
+		self.image_left = {1:"Sprites/left_still2.png", -1:"Sprites/left_move2.png"}
 
 		#sprite movement counts
 		self.up_count = 1
@@ -157,8 +155,6 @@ class Player2(pygame.sprite.Sprite):
 		self.right_count = 1
 		self.left_count = 1
 		self.timer = 0
-
-
 
 	def tick(self):
 		if self.gs.pressed["d"] == True:
@@ -214,15 +210,15 @@ class GameSpace:
 		if self.player2.rect.colliderect(obj.rect):
 			self.player2.rect = self.player2.rect.move(obj.speed[obj.number],0)
 
-	
 	def inbounds(self,car,lst):
 		if car.rect[0] >= -100 and car.rect[0] <= 650:
-			lst.append(car)	
-		
-	def main(self):
+			lst.append(car)
+
+	def game_screen(self):
 		pygame.init()
 		self.size = self.width, self.height = 640,640
 		self.bg = pygame.image.load("Sprites/background.png")
+		self.go = pygame.image.load("Sprites/gameover.png")
 		self.black = 0,0,0
 
 		#variables for object generation
@@ -234,6 +230,7 @@ class GameSpace:
 		self.car_list = []
 		self.temp_car = []
 
+	def frog_start(self):
 		#creating lives image
 		self.lives_list = []
 		self.lives_list.append(Lives(self,560))
@@ -242,14 +239,58 @@ class GameSpace:
 
 		#creating game objects
 		self.player = Player(self)
-                self.player2 = Player2(self)
+		self.score1 = 0
+		self.player2 = Player2(self)
+		self.score2 = 0
 
 		#setting up screen
 		self.screen = pygame.display.set_mode(self.size)
 		self.clock = pygame.time.Clock()
 
 		#gameplay variables
-		self.lives = 10
+		self.lives = 3
+
+	def wait(self):
+		while True:
+			event = pygame.event.wait()
+			if event.type == QUIT:
+				pygame.quit()
+				sys.exit()
+			if event.type == KEYDOWN and event.key == K_y:
+				break
+			if event.type == KEYDOWN and event.key == K_n:
+				pygame.quit()
+				sys.exit()
+
+	def frog_restart(self):
+		self.lives = 3
+
+		#creating lives image
+		self.lives_list = []
+		self.lives_list.append(Lives(self,560))
+		self.lives_list.append(Lives(self,580))
+		self.lives_list.append(Lives(self,600))
+
+		self.pressed = {"up":False, "down":False, "right":False, "left":False,"w":False, "s":False, "d":False, "a":False}
+
+		self.player.rect = self.player.image.get_rect()
+		self.player.rect = self.player.rect.move(320,580)
+
+		self.player2.rect = self.player2.image.get_rect()
+		self.player2.rect = self.player2.rect.move(100,580)
+
+		self.screen.fill(self.black)
+		self.screen.blit(self.go,(0,0))
+
+		pygame.display.flip()
+
+		self.wait()
+
+	def main(self):
+
+		self.game_screen()
+
+		self.frog_start()
 
 		#pressed keys
 		self.pressed = {"up":False, "down":False, "right":False, "left":False,"w":False, "s":False, "d":False, "a":False}
@@ -272,15 +313,15 @@ class GameSpace:
 					if(event.key == pygame.K_DOWN):
 						self.pressed['down'] = True
 
-				if event.type == KEYUP:                   		
+				if event.type == KEYUP:
 					if(event.key == pygame.K_RIGHT):
-						self.pressed['right'] = False	
+						self.pressed['right'] = False
 					if(event.key == pygame.K_LEFT):
-                        			self.pressed['left'] = False
+						self.pressed['left'] = False
 					if(event.key == pygame.K_UP):
-                        			self.pressed['up'] = False
+						self.pressed['up'] = False
 					if(event.key == pygame.K_DOWN):
-                        			self.pressed['down'] = False
+						self.pressed['down'] = False
 
 
 
@@ -294,15 +335,15 @@ class GameSpace:
 					if(event.key == pygame.K_w):
 						self.pressed['w'] = True
 
-				if event.type == KEYUP:                   		
+				if event.type == KEYUP:
 					if(event.key == pygame.K_a):
-						self.pressed['a'] = False	
+						self.pressed['a'] = False
 					if(event.key == pygame.K_s):
-                        			self.pressed['s'] = False
+						self.pressed['s'] = False
 					if(event.key == pygame.K_d):
-                        			self.pressed['d'] = False
+						self.pressed['d'] = False
 					if(event.key == pygame.K_w):
-                        			self.pressed['w'] = False
+						self.pressed['w'] = False
 
 
 			#generating Cars
@@ -340,13 +381,17 @@ class GameSpace:
 			#Clock and Object ticks
 			self.clock.tick(60)
 			self.player.tick()
-                        self.player2.tick()
+			self.player2.tick()
 
 			for car in self.car_list:
 				car.tick()
 				self.inbounds(car,self.temp_car)
 				self.player_hit(car)
-                                self.player_hit2(car)
+				self.player_hit2(car)
+
+			if self.lives == 0:
+				self.frog_restart()
+				continue
 
 			for obj in self.object_list:
 				obj.tick(self.counter)
@@ -354,16 +399,25 @@ class GameSpace:
 				if self.player.rect[1] <=280:
 					self.player_float(obj)
 
-				if self.player2.rect[1] <=280:
-					self.player_float2(obj)
+			if self.player2.rect[1] <= 280 and self.player2.rect[1] > 50:
+				self.player_float2(obj)
 
-			if self.player.rect[1] <= 280:
+			if self.player.rect[1] <= 280 and self.player.rect[1] > 50:
 				if self.player.rect.collidelist(self.object_list) == -1:
 					self.lives = self.lives - 1
 					self.lives_list.pop()
 					self.player.rect = self.player.image.get_rect()
-					self.player.rect = self.player.rect.move(320,580)
+					self.player.rect = self.player.rect.move(320,590)
 
+			if self.player.rect[1] < 50:
+				self.score += 1
+				self.player.rect = self.player.image.get_rect()
+				self.player.rect = self.player.rect.move(320,590)
+
+			if self.player2.rect[1] < 50:
+				self.score += 1
+				self.player2.rect = self.player2.image.get_rect()
+				self.player2.rect = self.player2.rect.move(100,590)
 
 
 			if self.player2.rect[1] <= 280:
@@ -371,7 +425,7 @@ class GameSpace:
 					self.lives = self.lives - 1
 					self.lives_list.pop()
 					self.player2.rect = self.player2.image.get_rect()
-					self.player2.rect = self.player2.rect.move(320,580)
+					self.player2.rect = self.player2.rect.move(100,580)
 
 			#clearing the off screen cars
 			self.car_list = self.temp_car
@@ -387,7 +441,7 @@ class GameSpace:
 			#display
 			self.screen.fill(self.black)
 			self.screen.blit(self.bg,(0,0))
-			
+
 			for car in self.car_list:
 				self.screen.blit(car.image,car.rect)
 
@@ -401,6 +455,7 @@ class GameSpace:
 			self.screen.blit(self.player2.image, self.player2.rect)
 
 			pygame.display.flip()
+
 
 if __name__ == '__main__':
 	gs = GameSpace()
