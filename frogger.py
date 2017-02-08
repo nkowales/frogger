@@ -83,7 +83,7 @@ class Cars(pygame.sprite.Sprite):
 
 #class for frogger
 class Player(pygame.sprite.Sprite):
-	def __init__(self, gs=None):
+	def __init__(self,gs=None):
 		pygame.sprite.Sprite.__init__(self)
 
 		self.gs = gs
@@ -134,6 +134,58 @@ class Player(pygame.sprite.Sprite):
 		#increment counter
 		self.timer = self.timer + 1
 
+class Player2(pygame.sprite.Sprite):
+	def __init__(self, gs=None):
+		pygame.sprite.Sprite.__init__(self)
+
+		self.gs = gs
+		self.image = pygame.image.load("Sprites/up_still2.png")
+		self.rect = self.image.get_rect()
+		self.rect = self.rect.move(100,600)
+
+		#sprite movement dictionaries
+		self.image_up = {1:"Sprites/up_still2.png", -1:"Sprites/up_move2.png"}
+		self.image_down = {1:"Sprites/down_still2.png", -1:"Sprites/down_move2.png"}
+		self.image_right = {1:"Sprites/right_still2.png", -1:"Sprites/right_move2.png"}
+		self.image_left = {1:"Sprites/left_still2.png", -1:"Sprites/left_move2.png"}
+
+		#sprite movement counts
+		self.up_count = 1
+		self.down_count = 1
+		self.right_count = 1
+		self.left_count = 1
+		self.timer = 0
+
+	def tick(self):
+		if self.gs.pressed["d"] == True:
+			self.rect = self.rect.move(5,0)
+			self.image = pygame.image.load(self.image_right[self.right_count])
+			#chaning the sprites
+			if self.timer % 3 == 0:
+				self.right_count = self.right_count * -1
+		if self.gs.pressed["a"] == True:
+			self.rect = self.rect.move(-5,0)
+			self.image = pygame.image.load(self.image_left[self.left_count])
+			#changing the sprites
+			if self.timer % 3 == 0:
+				self.left_count = self.left_count * -1
+		if self.gs.pressed["w"] == True:
+			self.rect = self.rect.move(0,-5)
+			self.image = pygame.image.load(self.image_up[self.up_count])
+			#changing the sprite
+			if self.timer % 2 == 0:
+				self.up_count = self.up_count * -1
+		if self.gs.pressed["s"] == True:
+			self.rect = self.rect.move(0,5)
+			self.image = pygame.image.load(self.image_down[self.down_count])
+			#chaning the sprite
+			if self.timer % 2 == 0:
+				self.down_count = self.down_count * -1
+
+
+		#increment counter
+		self.timer = self.timer + 1
+
 class GameSpace:
 
 	def player_hit(self,car):
@@ -143,9 +195,20 @@ class GameSpace:
 			self.lives = self.lives - 1
 			self.lives_list.pop()
 
+	def player_hit2(self,car):
+		if self.player2.rect.colliderect(car.rect):
+			self.player2.rect = self.player2.image.get_rect()
+			self.player2.rect = self.player2.rect.move(100,580)
+			self.lives = self.lives - 1
+			self.lives_list.pop()
+
 	def player_float(self,obj):
 		if self.player.rect.colliderect(obj.rect):
 			self.player.rect = self.player.rect.move(obj.speed[obj.number],0)
+
+	def player_float2(self,obj):
+		if self.player2.rect.colliderect(obj.rect):
+			self.player2.rect = self.player2.rect.move(obj.speed[obj.number],0)
 
 	def inbounds(self,car,lst):
 		if car.rect[0] >= -100 and car.rect[0] <= 650:
@@ -176,7 +239,9 @@ class GameSpace:
 
 		#creating game objects
 		self.player = Player(self)
-		self.score = 0
+		self.score1 = 0
+		self.player2 = Player2(self)
+		self.score2 = 0
 
 		#setting up screen
 		self.screen = pygame.display.set_mode(self.size)
@@ -206,8 +271,13 @@ class GameSpace:
 		self.lives_list.append(Lives(self,580))
 		self.lives_list.append(Lives(self,600))
 
-		self.pressed = {"up":False, "down":False, "right":False, "left":False}
+		self.pressed = {"up":False, "down":False, "right":False, "left":False,"w":False, "s":False, "d":False, "a":False}
 
+		self.player.rect = self.player.image.get_rect()
+		self.player.rect = self.player.rect.move(320,580)
+
+		self.player2.rect = self.player2.image.get_rect()
+		self.player2.rect = self.player2.rect.move(100,580)
 
 		self.screen.fill(self.black)
 		self.screen.blit(self.go,(0,0))
@@ -223,7 +293,8 @@ class GameSpace:
 		self.frog_start()
 
 		#pressed keys
-		self.pressed = {"up":False, "down":False, "right":False, "left":False}
+		self.pressed = {"up":False, "down":False, "right":False, "left":False,"w":False, "s":False, "d":False, "a":False}
+
 
 		#starting game loop
 		while 1:
@@ -246,11 +317,34 @@ class GameSpace:
 					if(event.key == pygame.K_RIGHT):
 						self.pressed['right'] = False
 					if(event.key == pygame.K_LEFT):
-                        			self.pressed['left'] = False
+						self.pressed['left'] = False
 					if(event.key == pygame.K_UP):
-                        			self.pressed['up'] = False
+						self.pressed['up'] = False
 					if(event.key == pygame.K_DOWN):
-                        			self.pressed['down'] = False
+						self.pressed['down'] = False
+
+
+
+				if event.type == KEYDOWN:
+					if(event.key == pygame.K_a):
+						self.pressed['a'] = True
+					if(event.key == pygame.K_s):
+						self.pressed['s'] = True
+					if(event.key == pygame.K_d):
+						self.pressed['d'] = True
+					if(event.key == pygame.K_w):
+						self.pressed['w'] = True
+
+				if event.type == KEYUP:
+					if(event.key == pygame.K_a):
+						self.pressed['a'] = False
+					if(event.key == pygame.K_s):
+						self.pressed['s'] = False
+					if(event.key == pygame.K_d):
+						self.pressed['d'] = False
+					if(event.key == pygame.K_w):
+						self.pressed['w'] = False
+
 
 			#generating Cars
 			if self.counter % 40 == 0:
@@ -287,14 +381,17 @@ class GameSpace:
 			#Clock and Object ticks
 			self.clock.tick(60)
 			self.player.tick()
-			# print self.player.rect[1]
+			self.player2.tick()
+
 			for car in self.car_list:
 				car.tick()
 				self.inbounds(car,self.temp_car)
 				self.player_hit(car)
+				self.player_hit2(car)
 
 			if self.lives == 0:
 				self.frog_restart()
+				continue
 
 			for obj in self.object_list:
 				obj.tick(self.counter)
@@ -302,7 +399,10 @@ class GameSpace:
 				if self.player.rect[1] <=280:
 					self.player_float(obj)
 
-			if self.player.rect[1] <= 280 and self.player.rect[1] >= 50:
+			if self.player2.rect[1] <= 280 and self.player2.rect[1] > 50:
+				self.player_float2(obj)
+
+			if self.player.rect[1] <= 280 and self.player.rect[1] > 50:
 				if self.player.rect.collidelist(self.object_list) == -1:
 					self.lives = self.lives - 1
 					self.lives_list.pop()
@@ -314,6 +414,18 @@ class GameSpace:
 				self.player.rect = self.player.image.get_rect()
 				self.player.rect = self.player.rect.move(320,590)
 
+			if self.player2.rect[1] < 50:
+				self.score += 1
+				self.player2.rect = self.player2.image.get_rect()
+				self.player2.rect = self.player2.rect.move(100,590)
+
+
+			if self.player2.rect[1] <= 280:
+				if self.player2.rect.collidelist(self.object_list) == -1:
+					self.lives = self.lives - 1
+					self.lives_list.pop()
+					self.player2.rect = self.player2.image.get_rect()
+					self.player2.rect = self.player2.rect.move(100,580)
 
 			#clearing the off screen cars
 			self.car_list = self.temp_car
@@ -340,6 +452,7 @@ class GameSpace:
 				self.screen.blit(life.image,life.rect)
 
 			self.screen.blit(self.player.image, self.player.rect)
+			self.screen.blit(self.player2.image, self.player2.rect)
 
 			pygame.display.flip()
 
