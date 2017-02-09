@@ -64,7 +64,7 @@ class Cars(pygame.sprite.Sprite):
 
 		#cars image and location list
 		self.cars = ['Sprites/left_car1.png','Sprites/right_car1.png','Sprites/left_car2.png','Sprites/right_car2.png','Sprites/left_car1.png']
-		self.pos = [550,510,450,410,350]
+		self.pos = [559,505,460,407,360]
 		self.speed = [1.5,1.1,1.6,1.3,2]
 
 		#loading image
@@ -291,6 +291,7 @@ class GameSpace:
 		self.game_screen()
 
 		self.frog_start()
+		self.score = 0
 
 		#pressed keys
 		self.pressed = {"up":False, "down":False, "right":False, "left":False,"w":False, "s":False, "d":False, "a":False}
